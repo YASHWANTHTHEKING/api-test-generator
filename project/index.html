@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TestGen AI | API Test Generator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                "primary": "#d0bcff", "secondary": "#adc6ff", "background": "#051424",
+                "on-surface": "#d4e4fa", "on-surface-variant": "#cbc3d7",
+                "surface-container": "#122131", "surface-container-low": "#0d1c2d",
+                "surface-container-high": "#1c2b3c", "surface-container-highest": "#273647",
+                "primary-container": "#a078ff", "secondary-container": "#0566d9",
+            }
+        }
+    }
+}
+</script>
+<style>
+body { background-color: #051424; color: #d4e4fa; overflow-x: hidden; font-family: 'Geist', sans-serif; }
+.glass-panel { background: rgba(18,33,49,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+.glow-primary { box-shadow: 0 0 20px rgba(208,188,255,0.15); }
+.sidebar-active { background: rgba(208,188,255,0.1); color: #d0bcff; }
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+@keyframes pulse-soft { 0%,100%{opacity:.8}50%{opacity:1;transform:scale(1.02)} }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+.method-get { background:rgba(34,197,94,.2); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+.method-post { background:rgba(59,130,246,.2); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
+.method-put { background:rgba(234,179,8,.2); color:#facc15; border:1px solid rgba(234,179,8,.3); }
+.method-delete { background:rgba(239,68,68,.2); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+.method-patch { background:rgba(249,115,22,.2); color:#fb923c; border:1px solid rgba(249,115,22,.3); }
+pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.drag-active { border-color: rgba(208,188,255,0.6) !important; background: rgba(208,188,255,0.05) !important; }
+</style>
+</head>
+<body class="text-base">
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-16 bottom-0 w-[260px] glass-panel border-r border-white/10 flex flex-col p-4 z-40">
+    <div class="flex items-center gap-3 mb-8 px-2">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#8B5CF6] to-[#3B82F6] flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-[20px]">bolt</span>
+        </div>
+        <div>
+            <h2 class="text-[18px] font-semibold text-on-surface">QA Architect</h2>
+            <p class="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-70">V3.4 Stable</p>
+        </div>
+    </div>
+
+    <!-- Model Selection -->
+    <div class="space-y-2 mb-8">
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant px-2">AI ENGINE</label>
+        <div class="relative px-2">
+            <select id="modelSelect" class="w-full bg-surface-container-low border border-white/10 rounded-lg py-2 px-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:outline-none appearance-none cursor-pointer">
+                <option value="llama-3.3-70b-versatile">llama-3.3-70b</option>
+                <option value="llama-3.1-8b-instant">llama-3.1-8b</option>
+                <option value="mixtral-8x7b-32768">mixtral-8x7b</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-sm">expand_more</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 space-y-1">
+        <a class="sidebar-active flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">psychology</span>
+            <span class="text-[12px] font-semibold uppercase tracking-wider">Generator</span>
+        </a>
+        <a class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">fact_check</span>
+            <span class="text-[12px] font-semibold uppercase tracking-wider">Test Suites</span>
+        </a>
+        <a class="text-on-surface-variant hover:bg-white/5 hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">history</span>
+            <span class="text-[12px] font-semibold uppercase tracking-wider">History</span>
+        </a>
+    </nav>
+
+    <!-- Generate Button in Sidebar -->
+    <button id="generateBtn" onclick="generateTests()"
+        class="mt-4 mb-8 bg-gradient-to-r from-[#8B5CF6] to-[#3B82F6] text-white py-3 rounded-lg text-sm font-bold glow-primary flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50">
+        <span class="material-symbols-outlined text-[18px]">bolt</span>
+        Generate Pytest Suite
+    </button>
+
+    <!-- About -->
+    <div class="border-t border-white/10 pt-4 px-2">
+        <h4 class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">ABOUT</h4>
+        <p class="text-[11px] leading-relaxed text-on-surface-variant opacity-60">
+            Automate your QA workflow by transforming OpenAPI specs into production-ready Pytest suites using LLMs.
+        </p>
+    </div>
+</aside>
+
+<!-- Top Nav -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 h-16 glass-panel backdrop-blur-md border-b border-white/10">
+    <div class="flex items-center gap-8">
+        <h1 class="text-[22px] bg-clip-text text-transparent bg-gradient-to-r from-[#d0bcff] to-[#adc6ff] font-bold">
+            TestGen AI
+        </h1>
+        <nav class="hidden md:flex gap-6">
+            <a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="#">Dashboard</a>
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors text-sm" href="#">Docs</a>
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors text-sm" href="#">Team</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <!-- Status Badge -->
+        <div id="statusBadge" class="hidden items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-white/10">
+            <div id="statusDot" class="w-2 h-2 rounded-full bg-green-400"></div>
+            <span id="statusText" class="text-xs text-on-surface-variant">Ready</span>
+        </div>
+        <a href="https://github.com/YASHWANTHTHEKING/api-test-generator" target="_blank"
+            class="text-on-surface-variant hover:text-primary transition-colors text-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[18px]">code</span> GitHub
+        </a>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="ml-[260px] pt-16 min-h-screen px-10 py-10 max-w-[1440px]">
+    <!-- Header -->
+    <header class="mb-10">
+        <h2 class="text-[32px] font-semibold text-on-surface leading-tight">AI-Powered API Test Generator</h2>
+        <p class="text-on-surface-variant mt-1">Automatically generate Pytest test cases from OpenAPI specifications with industrial-grade precision.</p>
+    </header>
+
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-12 gap-6">
+
+        <!-- Upload Zone -->
+        <section class="col-span-12 lg:col-span-7 glass-panel p-8 rounded-xl relative overflow-hidden">
+            <div id="dropZone"
+                class="flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-xl p-12 hover:border-primary/50 transition-colors group cursor-pointer"
+                ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('fileInput').click()">
+                <div class="bg-primary/10 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-primary text-[48px]">cloud_upload</span>
+                </div>
+                <h3 class="text-[18px] font-medium text-on-surface mb-2">Upload OpenAPI Spec</h3>
+                <p class="text-on-surface-variant text-sm mb-6">Drag and drop your YAML or JSON schema here</p>
+                <div id="fileNameDisplay" class="hidden bg-primary/10 border border-primary/30 rounded-lg px-4 py-2 mb-4 text-primary text-sm font-medium"></div>
+                <button class="bg-surface-container-highest border border-white/10 px-6 py-2 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors">
+                    Browse Files
+                </button>
+                <input type="file" id="fileInput" accept=".yaml,.yml,.json" class="hidden" onchange="handleFileSelect(event)"/>
+            </div>
+            <div class="mt-6 flex justify-between items-center">
+                <button onclick="loadSampleData()" class="flex items-center gap-2 text-primary text-sm font-medium hover:underline">
+                    <span class="material-symbols-outlined text-[18px]">data_object</span>
+                    Use Sample Data
+                </button>
+                <div class="flex items-center gap-2 text-[12px] text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[14px]">info</span>
+                    Supported: Swagger 2.0, OpenAPI 3.0+
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Panel -->
+        <section class="col-span-12 lg:col-span-5 glass-panel p-8 rounded-xl flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Current Status</h3>
+                    <span id="processingBadge" class="bg-blue-500/20 text-secondary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider animate-pulse-soft">Idle</span>
+                </div>
+                <!-- Progress -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-end mb-2">
+                        <span id="progressLabel" class="text-on-surface text-sm">Upload a spec to begin...</span>
+                        <span id="progressPct" class="text-primary font-bold">0%</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-[#8B5CF6] to-[#3B82F6] rounded-full transition-all duration-500" style="width:0%"></div>
+                    </div>
+                </div>
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="text-[10px] text-on-surface-variant uppercase mb-1">Parsed</p>
+                        <p id="endpointCount" class="text-2xl font-bold">—</p>
+                        <p class="text-[11px] text-on-surface-variant mt-1">Endpoints</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="text-[10px] text-on-surface-variant uppercase mb-1">Generated</p>
+                        <p id="generatedCount" class="text-2xl font-bold">—</p>
+                        <p class="text-[11px] text-on-surface-variant mt-1">Test Files</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Error display -->
+            <div id="errorBox" class="hidden mt-4 bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-300 text-sm"></div>
+        </section>
+
+        <!-- Endpoints Table -->
+        <section id="tableSection" class="col-span-12 glass-panel rounded-xl overflow-hidden hidden">
+            <div class="px-8 py-6 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-[18px] font-medium text-on-surface">Analyzed Endpoints</h3>
+                <div id="apiTitle" class="text-[12px] text-on-surface-variant opacity-70"></div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-highest/30">
+                            <th class="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Method</th>
+                            <th class="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Path</th>
+                            <th class="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Summary</th>
+                            <th class="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Required Fields</th>
+                            <th class="px-8 py-4 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">Responses</th>
+                        </tr>
+                    </thead>
+                    <tbody id="endpointsTableBody" class="divide-y divide-white/5"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Generated Code Output -->
+        <section id="codeSection" class="col-span-12 hidden">
+            <h3 class="text-[18px] font-semibold text-on-surface mb-4">Generated Test Files</h3>
+            <div id="codeOutputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+    </div>
+
+    <!-- Atmospheric Glow -->
+    <div class="fixed bottom-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+    <div class="fixed top-0 left-1/4 w-[300px] h-[300px] bg-secondary-container/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+</main>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+let parsedEndpoints = [];
+let parsedTitle = "";
+
+// =============================================
+// FILE UPLOAD HANDLERS
+// =============================================
+function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.add('drag-active');
+}
+function handleDragLeave(e) {
+    document.getElementById('dropZone').classList.remove('drag-active');
+}
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('drag-active');
+    const file = e.dataTransfer.files[0];
+    if (file) uploadFile(file);
+}
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) uploadFile(file);
+}
+
+async function uploadFile(file) {
+    setStatus('Parsing spec...', 'Processing', 10);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Upload failed');
+        displayEndpoints(data.data);
+        showFileLoaded(file.name);
+    } catch (err) { showError(err.message); }
+}
+
+async function loadSampleData() {
+    setStatus('Loading sample data...', 'Processing', 10);
+    try {
+        const res = await fetch('/api/sample');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Failed to load sample');
+        displayEndpoints(data.data);
+        showFileLoaded('sample_openapi.yaml');
+    } catch (err) { showError(err.message); }
+}
+
+// =============================================
+// DISPLAY ENDPOINTS TABLE
+// =============================================
+function displayEndpoints(data) {
+    parsedEndpoints = data.endpoints;
+    parsedTitle = data.title;
+
+    document.getElementById('endpointCount').textContent = parsedEndpoints.length;
+    document.getElementById('generatedCount').textContent = '—';
+    document.getElementById('apiTitle').textContent = `${data.title} v${data.version}`;
+    document.getElementById('tableSection').classList.remove('hidden');
+    document.getElementById('codeSection').classList.add('hidden');
+    document.getElementById('codeOutputs').innerHTML = '';
+
+    const colors = { GET:'method-get', POST:'method-post', PUT:'method-put', DELETE:'method-delete', PATCH:'method-patch' };
+    const tbody = document.getElementById('endpointsTableBody');
+    tbody.innerHTML = parsedEndpoints.map(ep => `
+        <tr class="hover:bg-white/5 transition-colors">
+            <td class="px-8 py-4">
+                <span class="px-2 py-1 ${colors[ep.method] || 'bg-white/10 text-white'} rounded text-[11px] font-bold">${ep.method}</span>
+            </td>
+            <td class="px-8 py-4 font-mono text-[13px] text-primary">${ep.path}</td>
+            <td class="px-8 py-4 text-sm text-on-surface-variant">${ep.summary || '—'}</td>
+            <td class="px-8 py-4 text-sm text-on-surface-variant">${ep.required_fields?.join(', ') || 'None'}</td>
+            <td class="px-8 py-4">
+                <div class="flex gap-1 flex-wrap">
+                    ${(ep.response_codes || []).map(code => `<span class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/60">${code}</span>`).join('')}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    setStatus(`${parsedEndpoints.length} endpoints found. Ready to generate!`, 'Ready', 100);
+}
+
+// =============================================
+// GENERATE TESTS
+// =============================================
+async function generateTests() {
+    if (!parsedEndpoints.length) {
+        showError('Please upload or load an OpenAPI spec first.');
+        return;
+    }
+
+    const model = document.getElementById('modelSelect').value;
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">autorenew</span> Generating...';
+
+    document.getElementById('codeSection').classList.remove('hidden');
+    document.getElementById('codeOutputs').innerHTML = '';
+    document.getElementById('generatedCount').textContent = '0';
+    hideError();
+
+    setStatus('Calling AI model...', 'Generating', 20);
+
+    try {
+        const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoints: parsedEndpoints, model_name: model })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Generation failed');
+
+        let count = 0;
+        data.results.forEach((result, idx) => {
+            count++;
+            document.getElementById('generatedCount').textContent = count;
+            renderCodeBlock(result, idx);
+            setProgress(Math.round(((idx + 1) / data.results.length) * 100));
+        });
+
+        setStatus(`✅ Generated ${count} test files successfully!`, 'Done', 100);
+    } catch (err) {
+        showError(err.message);
+        setStatus('Generation failed.', 'Error', 0);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">bolt</span> Generate Pytest Suite';
+}
+
+// =============================================
+// RENDER CODE BLOCKS
+// =============================================
+function renderCodeBlock(result, idx) {
+    const container = document.getElementById('codeOutputs');
+    const div = document.createElement('div');
+    div.className = 'glass-panel rounded-xl flex flex-col';
+    div.innerHTML = `
+        <div class="bg-surface-container-highest px-6 py-3 border-b border-white/10 flex justify-between items-center rounded-t-xl" style="background:#1c2b3c">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-on-surface-variant text-[18px]">description</span>
+                <span class="font-mono text-[13px] text-on-surface">${result.filename || result.path}</span>
+                ${result.success ? '<span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">✓ Generated</span>' : '<span class="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">⚠ Error</span>'}
+            </div>
+            <div class="flex gap-2">
+                <button onclick="copyCode(${idx})" class="p-1.5 text-on-surface-variant hover:text-primary transition-colors" title="Copy">
+                    <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                </button>
+                ${result.filename ? `<a href="/api/download/${result.filename}" class="p-1.5 text-on-surface-variant hover:text-primary transition-colors" title="Download">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                </a>` : ''}
+            </div>
+        </div>
+        <div class="p-6 flex-1 overflow-auto custom-scrollbar" style="background:rgba(0,0,0,0.5); min-height:200px; max-height:400px;">
+            <pre id="code-${idx}" class="leading-relaxed text-[#d4e4fa]">${escapeHtml(result.code)}</pre>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function copyCode(idx) {
+    const code = document.getElementById(`code-${idx}`).textContent;
+    navigator.clipboard.writeText(code).then(() => alert('Copied to clipboard!'));
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// =============================================
+// UI HELPERS
+// =============================================
+function setStatus(label, badge, pct) {
+    document.getElementById('progressLabel').textContent = label;
+    document.getElementById('processingBadge').textContent = badge;
+    setProgress(pct);
+    hideError();
+}
+function setProgress(pct) {
+    document.getElementById('progressBar').style.width = `${pct}%`;
+    document.getElementById('progressPct').textContent = `${pct}%`;
+}
+function showFileLoaded(name) {
+    const display = document.getElementById('fileNameDisplay');
+    display.textContent = `📄 ${name}`;
+    display.classList.remove('hidden');
+}
+function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = `❌ ${msg}`;
+    box.classList.remove('hidden');
+}
+function hideError() {
+    document.getElementById('errorBox').classList.add('hidden');
+}
+</script>
+</body>
+</html>

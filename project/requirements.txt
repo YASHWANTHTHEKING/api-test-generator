@@ -5,3 +5,6 @@ requests
 pytest
 pandas
 python-dotenv
+fastapi
+uvicorn
+python-multipart
