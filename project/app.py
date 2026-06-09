@@ -11,7 +11,7 @@ import os
 import time
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file (for local development)
 load_dotenv()
 
 # Import our custom modules
@@ -27,7 +27,12 @@ st.title("AI-Powered API Test Generator")
 with st.sidebar:
     st.header("Configuration")
     
-    env_api_key = os.environ.get("GROQ_API_KEY", "")
+    # Load API key: check Streamlit secrets first (cloud), then .env (local)
+    env_api_key = ""
+    try:
+        env_api_key = st.secrets["GROQ_API_KEY"]  # Streamlit Cloud secret
+    except Exception:
+        env_api_key = os.environ.get("GROQ_API_KEY", "")  # Local .env file
     
     if env_api_key:
         api_key = env_api_key
