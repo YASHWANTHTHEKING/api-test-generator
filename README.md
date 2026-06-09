@@ -1,6 +1,8 @@
 # AI-Powered API Test Generator
 
-🚀 **Live Demo:** [https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/](https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/)
+🚀 **Live Demo (HTML App):** [https://api-test-generator-n5sd.onrender.com/](https://api-test-generator-n5sd.onrender.com/)
+
+🎯 **Streamlit App:** [https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/](https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/)
 
 🎬 **Demo Video:** [Watch on Google Drive](https://drive.google.com/file/d/1wExZe7dMkQ84SfubtWm3pxQDOFPt0Du4/view?usp=sharing)
 
