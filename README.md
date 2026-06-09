@@ -2,6 +2,8 @@
 
 🚀 **Live Demo:** [https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/](https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/)
 
+🎬 **Demo Video:** [Watch on Google Drive](https://drive.google.com/file/d/1wExZe7dMkQ84SfubtWm3pxQDOFPt0Du4/view?usp=sharing)
+
 An AI-powered tool that automatically generates **Pytest test cases** from OpenAPI/Swagger specifications using the **Groq LLaMA 3.3 70B** model.
 
 Built by a 4-member engineering student team as part of the **AI Prototype Challenge**.
