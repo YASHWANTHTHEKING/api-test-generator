@@ -1,5 +1,7 @@
 # AI-Powered API Test Generator
 
+🚀 **Live Demo:** [https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/](https://api-test-generator-mtib25qkxnte8b4pydzr9u.streamlit.app/)
+
 An AI-powered tool that automatically generates **Pytest test cases** from OpenAPI/Swagger specifications using the **Groq LLaMA 3.3 70B** model.
 
 Built by a 4-member engineering student team as part of the **AI Prototype Challenge**.
@@ -135,12 +137,12 @@ The app will automatically open in your browser at `http://localhost:8501`.
 
 ## 👥 Team
 
-| Role | File Owned |
-|---|---|
-| Team Leader (Frontend) | `app.py` |
-| AI Engineer | `generator.py` |
-| Backend / Parser | `parser.py` |
-| Data & Setup | `sample_openapi.yaml`, `.gitignore` |
+| Name | Role | File Owned |
+|---|---|---|
+| Yashwanth NV | Team Leader / Frontend | `app.py` |
+| Prasanna Suriya | AI Engineer | `generator.py` |
+| Layasree | Backend / Parser | `parser.py` |
+| Muthuselvi | Data & Setup | `sample_openapi.yaml`, `.gitignore` |
 
 ---
 
