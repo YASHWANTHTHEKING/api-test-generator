@@ -1,0 +1,77 @@
+AI-Powered API Test Generator - Development Notes
+==================================================
+College Project | Team: YASHWANTHTHEKING
+Date: June 2026
+
+---
+
+TOOLS USED
+----------
+- AI Assistant : Google Antigravity (Gemini / Claude)
+- AI Model     : Groq LLaMA 3.3 70B (Free API)
+- Frontend     : Streamlit
+- Language     : Python 3.x
+
+---
+
+KEY PROMPTS USED
+----------------
+
+1. PROJECT SETUP PROMPT
+   "Build a simple AI-Powered API Test Generator using Python with Streamlit,
+   Groq API, PyYAML, and Pytest. Use a flat project structure:
+   app.py, parser.py, generator.py, requirements.txt, sample_openapi.yaml"
+
+2. PARSER PROMPT
+   "Write a Python function to parse OpenAPI YAML and JSON files.
+   Extract: HTTP method, URL path, summary, required fields, response codes."
+
+3. GENERATOR PROMPT (sent to AI inside the app)
+   "You are an expert QA Engineer. Generate pytest + requests test cases for:
+   A. Positive Tests (valid payload)
+   B. Negative Tests (missing fields, invalid types, bad email)
+   C. Boundary Tests (empty strings, null values, max length)"
+
+4. UI PROMPT
+   "Build a Streamlit app with file upload, API key sidebar, endpoint table,
+   generate button, progress bar, code display, and download buttons."
+
+5. SECURITY PROMPT
+   "Create a .env file for the API key and a .gitignore to prevent
+   committing secrets to GitHub."
+
+---
+
+HOW THE APP WORKS (Simple Explanation)
+---------------------------------------
+Step 1 → User uploads an OpenAPI YAML or JSON file
+Step 2 → parser.py reads the file and extracts all API endpoints
+Step 3 → The extracted data is shown in a table on the screen
+Step 4 → User clicks "Generate Pytest Suite"
+Step 5 → generator.py sends each endpoint to the Groq AI (LLaMA 3.3)
+Step 6 → The AI writes Pytest code covering happy path, bad input, edge cases
+Step 7 → The tests are shown on screen and saved to the tests/ folder
+Step 8 → User can download each test file directly from the browser
+
+---
+
+MANDATORY REQUIREMENTS MET
+---------------------------
+[x] AI-Assisted Development   → Entire project built using AI coding assistant
+[x] Prompt Documentation      → This file + prompts-notes.md
+[x] External API Integration  → Groq API (LLaMA 3.3 70B model)
+
+---
+
+TEAM FILE OWNERSHIP
+-------------------
+Team Leader   → app.py (Streamlit frontend)
+Teammate 1    → generator.py (Groq AI integration)
+Teammate 2    → parser.py (OpenAPI parsing)
+Teammate 3    → sample_openapi.yaml + .gitignore (data + setup)
+
+---
+
+GITHUB REPOSITORY
+-----------------
+https://github.com/YASHWANTHTHEKING/api-test-generator

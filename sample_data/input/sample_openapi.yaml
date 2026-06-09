@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: Sample API for College Project
+  version: 1.0.0
+  description: A simple API for testing users and orders endpoints.
+
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      description: Adds a new user to the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  description: Full name of the user
+                email:
+                  type: string
+                  format: email
+                  description: Valid email address
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request (missing fields or invalid data)
+
+  /orders:
+    post:
+      summary: Create a new order
+      description: Places a new order for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - item_name
+                - quantity
+              properties:
+                user_id:
+                  type: integer
+                  description: ID of the user placing the order
+                item_name:
+                  type: string
+                  description: Name of the item
+                quantity:
+                  type: integer
+                  minimum: 1
+                  description: Number of items ordered
+      responses:
+        '201':
+          description: Order placed successfully
+        '400':
+          description: Bad request
