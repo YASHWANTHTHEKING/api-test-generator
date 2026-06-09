@@ -2,6 +2,12 @@
 .env
 .env.*
 
+# Large video files (upload to Google Drive or YouTube instead)
+*.mp4
+*.avi
+*.mov
+demovideo/
+
 # Virtual environments
 .venv/
 venv/
