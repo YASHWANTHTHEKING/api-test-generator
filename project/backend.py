@@ -4,6 +4,7 @@ Serves the HTML frontend and handles API calls for parsing and test generation.
 """
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -11,6 +12,8 @@ import os
 import sys
 import json
 import uuid
+import zipfile
+import io
 from datetime import datetime
 # Add parent directory to path so we can import our modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -162,6 +165,26 @@ async def download_file(filename: str):
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(filepath, filename=filename, media_type="text/x-python")
+# ---- Download all generated test files as zip ----
+@app.get("/api/download-all")
+async def download_all_files():
+    os.makedirs(TESTS_DIR, exist_ok=True)
+    files = [f for f in os.listdir(TESTS_DIR) if f.endswith(".py")]
+    if not files:
+        raise HTTPException(status_code=404, detail="No test files found to download")
+    
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for fname in files:
+            fpath = os.path.join(TESTS_DIR, fname)
+            zip_file.write(fpath, fname)
+            
+    zip_buffer.seek(0)
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/x-zip-compressed",
+        headers={"Content-Disposition": "attachment; filename=all_test_suites.zip"}
+    )
 # ---- Test Suites APIs ----
 @app.get("/api/test-suites")
 async def list_test_suites():
