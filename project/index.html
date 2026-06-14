@@ -218,7 +218,12 @@ pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
 
             <!-- Generated Code Output -->
             <section id="codeSection" class="col-span-12 hidden">
-                <h3 class="text-[18px] font-semibold text-on-surface mb-4">Generated Test Files</h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[18px] font-semibold text-on-surface">Generated Test Files</h3>
+                    <a href="/api/download-all" id="downloadAllGenBtn" class="bg-primary/20 text-primary border border-primary/30 px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/30 transition-all flex items-center gap-1.5 uppercase tracking-wider">
+                        <span class="material-symbols-outlined text-[18px]">download_for_offline</span> Download All (.zip)
+                    </a>
+                </div>
                 <div id="codeOutputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </section>
 
@@ -238,9 +243,14 @@ pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
             <div class="col-span-12 lg:col-span-4 glass-panel p-6 rounded-xl flex flex-col h-[600px]">
                 <h3 class="text-[14px] font-semibold uppercase tracking-wider text-on-surface-variant mb-4 flex justify-between items-center">
                     <span>Test Files</span>
-                    <button onclick="loadTestSuites()" class="text-primary hover:underline text-xs flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">refresh</span> Refresh
-                    </button>
+                    <div class="flex gap-3">
+                        <a href="/api/download-all" id="downloadAllSuitesBtn" class="text-primary hover:underline text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">download_for_offline</span> Download All
+                        </a>
+                        <button onclick="loadTestSuites()" class="text-primary hover:underline text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">refresh</span> Refresh
+                        </button>
+                    </div>
                 </h3>
                 <div id="testSuitesList" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-2">
                     <p class="text-on-surface-variant text-sm opacity-60">No test suites found. Generate some in the Generator tab!</p>
@@ -538,13 +548,16 @@ async function loadTestSuites() {
         if (!res.ok) throw new Error(data.detail || 'Failed to load test suites');
         
         const listContainer = document.getElementById('testSuitesList');
+        const downloadAllBtn = document.getElementById('downloadAllSuitesBtn');
         if (!data.files || data.files.length === 0) {
             listContainer.innerHTML = `<p class="text-on-surface-variant text-sm opacity-60 p-4 text-center">No test suites found. Generate some in the Generator tab!</p>`;
             document.getElementById('previewHeader').classList.add('hidden');
             document.getElementById('previewHeader').classList.remove('flex');
             document.getElementById('previewCodeArea').textContent = 'Select a test file from the list to preview the generated code.';
+            if (downloadAllBtn) downloadAllBtn.classList.add('hidden');
             return;
         }
+        if (downloadAllBtn) downloadAllBtn.classList.remove('hidden');
         
         listContainer.innerHTML = data.files.map(file => {
             const formattedSize = (file.size / 1024).toFixed(2) + ' KB';
